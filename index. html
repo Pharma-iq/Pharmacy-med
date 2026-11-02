@@ -2,28 +2,26 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-            <meta name="theme-color" content="#16834b">
-                <title>النظام الصيدلاني</title>
-                    <style>
-                            body { margin: 0; background: #f4f8f5; font-family: Tahoma, Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; color: #183128; }
-                                    .box { background: white; padding: 40px 25px; border-radius: 20px; box-shadow: 0 8px 25px rgba(22,131,75,0.1); width: 90%; max-width: 380px; text-align: center; }
-                                            h1 { color: #16834b; font-size: 24px; margin: 0 0 10px; font-weight: 700; }
-                                                    p { color: #718078; font-size: 14px; margin-bottom: 30px; }
-                                                            .btn { display: block; width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 14px; font-size: 17px; font-weight: bold; text-decoration: none; transition: 0.2s; }
-                                                                    .btn-khafra { background: #16834b; color: white; border: 2px solid #16834b; }
-                                                                            .btn-khafra:active { background: #126b3c; transform: scale(0.98); }
-                                                                                    .btn-internal { background: white; color: #16834b; border: 2px solid #16834b; }
-                                                                                            .btn-internal:active { background: #e8f6ed; transform: scale(0.98); }
-                                                                                                </style>
-                                                                                                </head>
-                                                                                                <body>
-                                                                                                    <div class="box">
-                                                                                                            <h1>النظام الصيدلاني</h1>
-                                                                                                                    <p>اختر القسم المطلوب لعرض الأدوية وحالة توفرها</p>
-                                                                                                                            <a href="khafra.html" class="btn btn-khafra">صيدلية الخافرة</a>
-                                                                                                                                    <a href="internal.html" class="btn btn-internal">الصيدلية الداخلية</a>
-                                                                                                                                        </div>
-                                                                                                                                        </body>
-                                                                                                                                        </html>
-                                                                                                                                        
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#16834b">
+    <title>نظام الصيدلية</title>
+    <style>
+        :root { --green: #16834b; --bg: #f4f8f5; --ink: #183128; }
+        * { box-sizing: border-box; font-family: Tahoma, Arial, sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--ink); display: flex; flex-direction: column; min-height: 100vh; align-items: center; justify-content: center; padding: 20px; }
+        .card { background: white; width: 100%; max-width: 400px; padding: 35px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(22, 131, 75, 0.1); text-align: center; border: 1px solid #e5ece7; }
+        h1 { color: var(--green); font-size: 24px; margin: 0 0 10px; }
+        p { color: #718078; margin: 0 0 35px; font-size: 14px; }
+        .btn { display: block; background: #f0fdf4; border: 2px solid var(--green); color: var(--green); text-decoration: none; padding: 18px; border-radius: 16px; font-size: 18px; font-weight: bold; margin-bottom: 15px; transition: all 0.2s ease; }
+        .btn:hover, .btn:active { background: var(--green); color: white; transform: scale(0.97); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>مرحباً بك في النظام 🩺</h1>
+        <p>الرجاء اختيار القسم المطلوب لعرض الأدوية</p>
+        <a href="khafra.html" class="btn">💊 أدوية الخافرة</a>
+        <a href="internal.html" class="btn">🏥 الصيدلية الداخلية</a>
+    </div>
+</body>
+</html>
