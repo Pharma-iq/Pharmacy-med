@@ -6,15 +6,464 @@
     <meta name="theme-color" content="#16834b">
     <title>الصيدلية الداخلية</title>
     <style>
-        body { background: #f4f8f5; color: #183128; font-family: Tahoma, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; padding: 20px;}
-        h1 { color: #16834b; }
-        a { display: inline-block; margin-top: 20px; background: #16834b; color: white; text-decoration: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; }
+        :root {
+            --green: #16834b;
+            --green-bg: #e8f6ed;
+            --red: #c93636;
+            --red-bg: #fff0f0;
+            --amber: #a66a00;
+            --amber-bg: #fff6df;
+            --ink: #183128;
+            --muted: #718078;
+            --line: #e5ece7;
+            --bg: #f4f8f5;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: var(--bg);
+            font-family: Tahoma, Arial, sans-serif;
+            color: var(--ink);
+        }
+        header {
+            background: linear-gradient(135deg, #126b3c, #1a9656);
+            color: white;
+            padding: 25px 18px 27px;
+            border-radius: 0 0 24px 24px;
+        }
+        .wrap { width: min(760px, 100%); margin: auto; }
+        header h1 { font-size: 23px; margin: 0 0 7px; font-weight: 700; }
+        header p { margin: 0; color: #e0f4e8; font-size: 13px; }
+        main { padding: 17px 14px 38px; }
+        .search {
+            width: 100%; border: 1px solid var(--line); border-radius: 13px;
+            padding: 14px 15px; font: inherit; background: white; outline: none;
+            margin-bottom: 14px; box-shadow: 0 2px 9px #163d2310;
+        }
+        .search:focus { border-color: var(--green); }
+        .stats { display: flex; gap: 8px; margin-bottom: 17px; }
+        .stat {
+            background: white; border: 1px solid var(--line); border-radius: 11px;
+            padding: 9px 11px; flex: 1; text-align: center; font-size: 12px; color: var(--muted);
+        }
+        .stat b { display: block; color: var(--ink); font-size: 17px; margin-bottom: 2px; }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .category {
+            background: white; border: 1px solid var(--line); border-radius: 14px;
+            padding: 15px 13px; text-align: right; cursor: pointer; min-height: 83px;
+            box-shadow: 0 3px 10px #18312808; transition: transform .12s, border-color .12s;
+        }
+        .category:active { transform: scale(.98); }
+        .category:hover { border-color: #8ac6a2; }
+        .catname { font-size: 14px; font-weight: 700; line-height: 1.5; color: var(--green); }
+        .count { font-size: 11px; color: var(--muted); margin-top: 7px; }
+        .empty { padding: 24px; text-align: center; color: var(--muted); background: white; border-radius: 13px; grid-column: 1/-1; }
+        .overlay {
+            display: none; position: fixed; inset: 0; background: #10251ccc; z-index: 5;
+            align-items: flex-end; justify-content: center; padding: 0;
+        }
+        .overlay.show { display: flex; }
+        .modal {
+            width: min(760px, 100%); max-height: 88dvh; background: white;
+            border-radius: 22px 22px 0 0; padding: 17px 15px 25px; display: flex;
+            flex-direction: column; box-shadow: 0 -8px 35px #0002;
+        }
+        .modalhead { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .modalhead h2 { font-size: 18px; margin: 0; color: var(--green); flex: 1; }
+        .close { border: 0; background: #f0f4f1; border-radius: 50%; width: 36px; height: 36px; font-size: 22px; color: #41564a; cursor: pointer; }
+        .modalmeta { font-size: 12px; color: var(--muted); margin: -4px 0 12px; }
+        .medlist { overflow: auto; }
+        .medicine { display: flex; align-items: flex-start; gap: 10px; padding: 13px 2px; border-bottom: 1px solid var(--line); }
+        .medname { font-size: 14px; font-weight: 600; line-height: 1.5; flex: 1; overflow-wrap: anywhere; }
+        .badge {
+            font-size: 11px; font-weight: 700; padding: 6px 9px; border-radius: 20px;
+            white-space: normal; max-width: 55%; text-align: center; line-height: 1.45;
+        }
+        .available { color: var(--green); background: var(--green-bg); }
+        .unavailable { color: var(--red); background: var(--red-bg); }
+        .conditional { color: var(--amber); background: var(--amber-bg); }
+        .unknown { color: #59645e; background: #eef1ef; }
+        .hint { font-size: 11px; color: var(--muted); margin-top: 16px; text-align: center; }
+        @media(min-width:600px) {
+            main { padding-top: 22px; }
+            .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .overlay { align-items: center; padding: 18px; }
+            .modal { border-radius: 20px; max-height: 80vh; padding: 20px; }
+            .category { padding: 17px; }
+        }
     </style>
 </head>
 <body>
-    <h1>الصيدلية الداخلية 🏥</h1>
-    <p>هذه الصفحة قيد الإنشاء... سيتم إضافة الأدوية قريباً.</p>
-    <a href="index.html">الرجوع للشاشة الرئيسية 🏠</a>
+    <header>
+        <div class="wrap">
+            <h1>الصيدلية الداخلية 🏥</h1>
+            <p>اختر القسم لعرض أدوية الصيدلية الداخلية وتوفرها</p>
+        </div>
+    </header>
+    
+    <main class="wrap">
+        <input id="search" class="search" type="search" placeholder="ابحث عن قسم أو دواء..." aria-label="ابحث عن قسم أو دواء">
+        <div class="stats">
+            <div class="stat"><b id="sectionCount">0</b>قسم</div>
+            <div class="stat"><b id="medicineCount">0</b>دواء</div>
+        </div>
+        <div id="categories" class="grid"></div>
+        <div class="hint">الأخضر: متوفر · الأحمر: غير متوفر · الأصفر: متوفر بشروط</div>
+        <br><br>
+        <div style="text-align: center;">
+            <a href="index.html" style="background: white; color: #16834b; padding: 10px 20px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 14px; border: 1px solid #16834b;">الرجوع للقائمة الرئيسية 🏠</a>
+        </div>
+    </main>
+
+    <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal">
+            <div class="modalhead">
+                <h2 id="modalTitle"></h2>
+                <button class="close" id="close" aria-label="إغلاق">×</button>
+            </div>
+            <div id="modalMeta" class="modalmeta"></div>
+            <div id="medlist" class="medlist"></div>
+        </section>
+    </div>
+
+    <script>
+        const sections = [
+            {
+                "title": "امبولات وفيالات",
+                "medicines": [
+                    {"name": "Paracetamol vial 1g / 500 mg", "state": "available", "label": "متوفر"},
+                    {"name": "Lasix ampule", "state": "available", "label": "متوفر"},
+                    {"name": "Decadron", "state": "available", "label": "متوفر"},
+                    {"name": "Clexane 4000 / 6000", "state": "available", "label": "متوفر"},
+                    {"name": "Calcium vial", "state": "available", "label": "متوفر"},
+                    {"name": "Amphotricin", "state": "available", "label": "متوفر"},
+                    {"name": "Heparin", "state": "available", "label": "متوفر"},
+                    {"name": "H.C", "state": "available", "label": "متوفر"},
+                    {"name": "B6 amp", "state": "available", "label": "متوفر"},
+                    {"name": "B12 amp", "state": "available", "label": "متوفر"},
+                    {"name": "Dopamine", "state": "available", "label": "متوفر"},
+                    {"name": "Dobutamine", "state": "available", "label": "متوفر"},
+                    {"name": "Methylprednisolone 500", "state": "available", "label": "متوفر"},
+                    {"name": "Hydralazine amp", "state": "available", "label": "متوفر"},
+                    {"name": "Atropine", "state": "available", "label": "متوفر"},
+                    {"name": "Angeside", "state": "available", "label": "متوفر"},
+                    {"name": "Metoprolol amp", "state": "available", "label": "متوفر"},
+                    {"name": "Actylase", "state": "available", "label": "متوفر"},
+                    {"name": "Voltaren amp", "state": "available", "label": "متوفر"},
+                    {"name": "Albumine / البومين مخفف", "state": "available", "label": "متوفر"},
+                    {"name": "انسولين خابط / مخلوط / صافي", "state": "available", "label": "متوفر"},
+                    {"name": "Anti D", "state": "available", "label": "متوفر"},
+                    {"name": "Digoxin amp", "state": "available", "label": "متوفر"},
+                    {"name": "Neglazyme", "state": "available", "label": "متوفر"},
+                    {"name": "Fabrazyme", "state": "available", "label": "متوفر"},
+                    {"name": "IVIG 10", "state": "available", "label": "متوفر"},
+                    {"name": "Surfactant", "state": "available", "label": "متوفر"},
+                    {"name": "فلتر مع الانزيمات", "state": "available", "label": "متوفر"},
+                    {"name": "Vimizime", "state": "available", "label": "متوفر"},
+                    {"name": "Adenosine", "state": "available", "label": "متوفر"},
+                    {"name": "Acupan", "state": "available", "label": "متوفر"},
+                    {"name": "Diltiazem", "state": "available", "label": "متوفر"},
+                    {"name": "Isordil", "state": "available", "label": "متوفر"},
+                    {"name": "Rolac amp", "state": "available", "label": "متوفر"},
+                    {"name": "Cyclokapron amp", "state": "available", "label": "متوفر"},
+                    {"name": "Lido vial", "state": "available", "label": "متوفر"},
+                    {"name": "Lido amp", "state": "available", "label": "متوفر"},
+                    {"name": "Aminophylline", "state": "available", "label": "متوفر"},
+                    {"name": "Atosiban", "state": "available", "label": "متوفر"},
+                    {"name": "Cerazyme", "state": "available", "label": "متوفر"},
+                    {"name": "Venofer ampule", "state": "available", "label": "متوفر"},
+                    {"name": "Adrenaline", "state": "conditional", "label": "مشتريات"},
+                    {"name": "Zofran amp", "state": "conditional", "label": "اورام اطفال"},
+                    {"name": "Nexium", "state": "conditional", "label": "مخصص"}
+                ]
+            },
+            {
+                "title": "حبوب وكبسول",
+                "medicines": [
+                    {"name": "Plavix", "state": "available", "label": "متوفر"},
+                    {"name": "Aspirine", "state": "available", "label": "متوفر"},
+                    {"name": "Brilinta", "state": "available", "label": "متوفر"},
+                    {"name": "Folic acid 5 / 400", "state": "available", "label": "متوفر"},
+                    {"name": "Duspatalin", "state": "available", "label": "متوفر"},
+                    {"name": "Paracetamol 500", "state": "available", "label": "متوفر"},
+                    {"name": "Montelukast (Montix) 10", "state": "available", "label": "متوفر"},
+                    {"name": "Montelukast (Montix) 5", "state": "available", "label": "متوفر"},
+                    {"name": "Calcium tab", "state": "available", "label": "متوفر"},
+                    {"name": "Capoten", "state": "available", "label": "متوفر"},
+                    {"name": "Carvedilol", "state": "available", "label": "متوفر"},
+                    {"name": "Lisinopril", "state": "available", "label": "متوفر"},
+                    {"name": "Losartan", "state": "available", "label": "متوفر"},
+                    {"name": "برزلون (Prednisolone)", "state": "available", "label": "متوفر"},
+                    {"name": "Savesto", "state": "available", "label": "متوفر"},
+                    {"name": "Dapagliflozin 5", "state": "available", "label": "متوفر"},
+                    {"name": "Profen", "state": "available", "label": "متوفر"},
+                    {"name": "Cordarone", "state": "available", "label": "متوفر"},
+                    {"name": "Omnic cap", "state": "available", "label": "متوفر"},
+                    {"name": "Mobic", "state": "available", "label": "متوفر"},
+                    {"name": "Moduretic", "state": "available", "label": "متوفر"},
+                    {"name": "Glucophage", "state": "available", "label": "متوفر"},
+                    {"name": "Hyporic", "state": "available", "label": "متوفر"},
+                    {"name": "Inderal", "state": "available", "label": "متوفر"},
+                    {"name": "Stugeron", "state": "available", "label": "متوفر"},
+                    {"name": "Daonil", "state": "available", "label": "متوفر"},
+                    {"name": "Sevelamer", "state": "available", "label": "متوفر"},
+                    {"name": "Ferrous sulfate", "state": "available", "label": "متوفر"},
+                    {"name": "Ferrofolic", "state": "available", "label": "متوفر"},
+                    {"name": "Cyclokapron tab", "state": "available", "label": "متوفر"},
+                    {"name": "Carbimazole", "state": "available", "label": "متوفر"},
+                    {"name": "Crestor tab", "state": "available", "label": "متوفر"},
+                    {"name": "Thyroxin 50/100", "state": "available", "label": "متوفر"},
+                    {"name": "Bisacodyl", "state": "available", "label": "متوفر"},
+                    {"name": "Nimodipine", "state": "available", "label": "متوفر"},
+                    {"name": "Diarrea stop", "state": "available", "label": "متوفر"},
+                    {"name": "Avas 40", "state": "available", "label": "متوفر"},
+                    {"name": "Omeprazole cap", "state": "available", "label": "متوفر"},
+                    {"name": "Labetalol tab", "state": "available", "label": "متوفر"},
+                    {"name": "Buscopan tab", "state": "conditional", "label": "مشتريات"}
+                ]
+            },
+            {
+                "title": "مضادات حيوية",
+                "medicines": [
+                    {"name": "Flagyl (tab/vial/sy)", "state": "available", "label": "متوفر"},
+                    {"name": "Ceftriaxone", "state": "available", "label": "متوفر"},
+                    {"name": "Claforan 500", "state": "available", "label": "متوفر"},
+                    {"name": "Ciprodar (vial/tab/drop)", "state": "available", "label": "متوفر"},
+                    {"name": "Amikacin", "state": "available", "label": "متوفر"},
+                    {"name": "Keflex (sy/cap)", "state": "available", "label": "متوفر"},
+                    {"name": "Methoprim (sy/tab)", "state": "available", "label": "متوفر"},
+                    {"name": "Caspofungin", "state": "available", "label": "متوفر"},
+                    {"name": "Suprax sy", "state": "available", "label": "متوفر"},
+                    {"name": "Doxydar cap", "state": "available", "label": "متوفر"},
+                    {"name": "Augmentin (tab/sy)", "state": "available", "label": "متوفر"},
+                    {"name": "Amoxil (cap/vial)", "state": "available", "label": "متوفر"},
+                    {"name": "Vancomycin", "state": "available", "label": "متوفر"},
+                    {"name": "Ceftazidime", "state": "available", "label": "متوفر"},
+                    {"name": "Flucloxacillin", "state": "available", "label": "متوفر"},
+                    {"name": "Tigecycline", "state": "available", "label": "متوفر"},
+                    {"name": "Azithro (tab/sy)", "state": "available", "label": "متوفر"}
+                ]
+            },
+            {
+                "title": "المؤثرات العقلية",
+                "medicines": [
+                    {"name": "Valium (diazepam) amp", "state": "available", "label": "متوفر"},
+                    {"name": "Allermine amp", "state": "available", "label": "متوفر"},
+                    {"name": "Plasil (metoclopromide) amp / tab", "state": "available", "label": "متوفر"},
+                    {"name": "Luminal (phenobarbital) amp", "state": "available", "label": "متوفر"},
+                    {"name": "Keppra 500/1000", "state": "available", "label": "متوفر"},
+                    {"name": "Depakine 200 tab / drop", "state": "available", "label": "متوفر"},
+                    {"name": "Libroxide 5 tab", "state": "available", "label": "متوفر"},
+                    {"name": "Gabapentin 300 cap", "state": "available", "label": "متوفر"},
+                    {"name": "Risperidone 2mg", "state": "available", "label": "متوفر"},
+                    {"name": "Tegretol 200", "state": "available", "label": "متوفر"},
+                    {"name": "Stemetil tab", "state": "available", "label": "متوفر"},
+                    {"name": "Olan 5 / 10", "state": "available", "label": "متوفر"},
+                    {"name": "Histadin tab / sy", "state": "available", "label": "متوفر"},
+                    {"name": "Baclofen", "state": "available", "label": "متوفر"},
+                    {"name": "Sinemet", "state": "available", "label": "متوفر"},
+                    {"name": "Mirtazapine 30", "state": "available", "label": "متوفر"},
+                    {"name": "Indomethacin", "state": "available", "label": "متوفر"},
+                    {"name": "Adol supp 250", "state": "available", "label": "متوفر"},
+                    {"name": "Indomethacin supp", "state": "available", "label": "متوفر"}
+                ]
+            },
+            {
+                "title": "أدوية سرطانية",
+                "medicines": [
+                    {"name": "Bleomycin", "state": "available", "label": "متوفر"},
+                    {"name": "MTX 50", "state": "available", "label": "متوفر"},
+                    {"name": "Avastin", "state": "available", "label": "متوفر"},
+                    {"name": "Cytosar", "state": "available", "label": "متوفر"},
+                    {"name": "Temozolomide", "state": "available", "label": "متوفر"},
+                    {"name": "Cisplatin", "state": "available", "label": "متوفر"},
+                    {"name": "Brentuximab", "state": "available", "label": "متوفر"},
+                    {"name": "Endoxan", "state": "available", "label": "متوفر"},
+                    {"name": "Bortezomib", "state": "available", "label": "متوفر"},
+                    {"name": "Vincristine", "state": "available", "label": "متوفر"},
+                    {"name": "Elyea", "state": "available", "label": "متوفر"},
+                    {"name": "Aranesp (aransib)", "state": "available", "label": "متوفر"},
+                    {"name": "Doxorubicin", "state": "available", "label": "متوفر"},
+                    {"name": "Vabysmo", "state": "available", "label": "متوفر"},
+                    {"name": "Asparaginase", "state": "available", "label": "متوفر"},
+                    {"name": "RTX", "state": "available", "label": "متوفر"},
+                    {"name": "6MP", "state": "available", "label": "متوفر"},
+                    {"name": "Neupogen", "state": "available", "label": "متوفر"},
+                    {"name": "Haloxan", "state": "available", "label": "متوفر"},
+                    {"name": "Dacarbazine", "state": "available", "label": "متوفر"},
+                    {"name": "Cellcept", "state": "available", "label": "متوفر"},
+                    {"name": "Gemcitabine", "state": "available", "label": "متوفر"},
+                    {"name": "Mesna", "state": "available", "label": "متوفر"},
+                    {"name": "Nplate", "state": "available", "label": "متوفر"},
+                    {"name": "Bendamustine", "state": "available", "label": "متوفر"},
+                    {"name": "Arsenic", "state": "available", "label": "متوفر"},
+                    {"name": "Daunorubicin", "state": "available", "label": "متوفر"},
+                    {"name": "Irinotecan", "state": "available", "label": "متوفر"},
+                    {"name": "Decitabine", "state": "available", "label": "متوفر"},
+                    {"name": "Ruxolitinib", "state": "available", "label": "متوفر"},
+                    {"name": "Fludarabine / Cladribine", "state": "available", "label": "متوفر"}
+                ]
+            },
+            {
+                "title": "مواد مخدرة (للطبيب فقط)",
+                "medicines": [
+                    {"name": "Morphine", "state": "conditional", "label": "تصرف بوصفة طبية فقط"},
+                    {"name": "Fentanyl", "state": "conditional", "label": "تصرف بوصفة طبية فقط"},
+                    {"name": "Remifentanil", "state": "conditional", "label": "تصرف بوصفة طبية فقط"},
+                    {"name": "Pethidine", "state": "conditional", "label": "تصرف بوصفة طبية فقط"},
+                    {"name": "Tramal", "state": "conditional", "label": "تصرف بوصفة طبية فقط"},
+                    {"name": "Pitocin", "state": "conditional", "label": "تصرف بوصفة طبية فقط"},
+                    {"name": "Methergine", "state": "conditional", "label": "تصرف بوصفة طبية فقط"}
+                ]
+            },
+            {
+                "title": "المغذيات",
+                "medicines": [
+                    {"name": "N/S 500", "state": "available", "label": "متوفر"},
+                    {"name": "G/S 1%", "state": "available", "label": "متوفر"},
+                    {"name": "G/S 1/2", "state": "available", "label": "متوفر"},
+                    {"name": "G/S 1/5", "state": "available", "label": "متوفر"},
+                    {"name": "Ringer", "state": "available", "label": "متوفر"},
+                    {"name": "D.W", "state": "available", "label": "متوفر"},
+                    {"name": "Mannitol", "state": "available", "label": "متوفر"},
+                    {"name": "G/W 500", "state": "available", "label": "متوفر"},
+                    {"name": "G/W 100", "state": "available", "label": "متوفر"},
+                    {"name": "N/S 100", "state": "conditional", "label": "اورام اطفال"}
+                ]
+            },
+            {
+                "title": "شرابات ومراهم",
+                "medicines": [
+                    {"name": "Adol sy", "state": "available", "label": "متوفر"},
+                    {"name": "Lactulose sy", "state": "available", "label": "متوفر"},
+                    {"name": "Tussilate sy", "state": "available", "label": "متوفر"},
+                    {"name": "Butadin sy", "state": "available", "label": "متوفر"},
+                    {"name": "Solvodin sy", "state": "available", "label": "متوفر"},
+                    {"name": "Buscopan sy", "state": "available", "label": "متوفر"},
+                    {"name": "Maalox sy", "state": "available", "label": "متوفر"},
+                    {"name": "Iron sy", "state": "available", "label": "متوفر"},
+                    {"name": "Dexamethasone drop", "state": "available", "label": "متوفر"},
+                    {"name": "ORS", "state": "available", "label": "متوفر"},
+                    {"name": "Zinc oit", "state": "available", "label": "متوفر"},
+                    {"name": "Hydrocortisone cream", "state": "available", "label": "متوفر"},
+                    {"name": "Dermodin", "state": "available", "label": "متوفر"},
+                    {"name": "Ventolin spray / solution", "state": "available", "label": "متوفر"},
+                    {"name": "Tetracycline eye oint", "state": "available", "label": "متوفر"},
+                    {"name": "Chloramphenicol eye oint", "state": "available", "label": "متوفر"},
+                    {"name": "Zovirax (oint/vial)", "state": "available", "label": "متوفر"},
+                    {"name": "Fucidin (eye drops/cream)", "state": "available", "label": "متوفر"},
+                    {"name": "Nystatin oint", "state": "available", "label": "متوفر"}
+                ]
+            },
+            {
+                "title": "المستلزمات",
+                "medicines": [
+                    {"name": "Syringe 1cc, 5cc, 10cc, 50cc", "state": "available", "label": "متوفر"},
+                    {"name": "Urine bag", "state": "available", "label": "متوفر"},
+                    {"name": "Micro drip", "state": "available", "label": "متوفر"},
+                    {"name": "Iv Set", "state": "available", "label": "متوفر"},
+                    {"name": "Canulla (صفراء، زرقاء، وردية، خضراء)", "state": "available", "label": "متوفر"},
+                    {"name": "Suction tube 18", "state": "available", "label": "متوفر"},
+                    {"name": "Blood exchange bag", "state": "available", "label": "متوفر"},
+                    {"name": "فلتر لمادة البنتوستام", "state": "available", "label": "متوفر"},
+                    {"name": "نيدل وردي للسحب", "state": "available", "label": "متوفر"},
+                    {"name": "Bone marrow needle", "state": "available", "label": "متوفر"},
+                    {"name": "NG 8, 10, 12, 14, 16, 18, 20, 22", "state": "available", "label": "متوفر"},
+                    {"name": "Folly 8, 10, 12, 16, 18, 22", "state": "available", "label": "متوفر"},
+                    {"name": "Folly 24 عادي / ثلاثي", "state": "available", "label": "متوفر"}
+                ]
+            }
+        ];
+
+        const cats = document.getElementById('categories');
+        const search = document.getElementById('search');
+        const overlay = document.getElementById('overlay');
+        const all = sections.reduce((n, s) => n + s.medicines.length, 0);
+        
+        document.getElementById('sectionCount').textContent = sections.length;
+        document.getElementById('medicineCount').textContent = all;
+        
+        function renderCategories(term = '') {
+            cats.innerHTML = '';
+            const q = term.trim().toLocaleLowerCase();
+            let found = 0;
+            
+            sections.forEach((s, i) => {
+                const matches = s.medicines.filter(m => !q || m.name.toLocaleLowerCase().includes(q) || m.label.toLocaleLowerCase().includes(q));
+                if (q && !s.title.toLocaleLowerCase().includes(q) && matches.length === 0) return;
+                
+                found++;
+                const b = document.createElement('button');
+                b.className = 'category';
+                b.type = 'button';
+                
+                const title = document.createElement('div');
+                title.className = 'catname';
+                title.textContent = s.title;
+                
+                const count = document.createElement('div');
+                count.className = 'count';
+                count.textContent = matches.length + ' دواء';
+                
+                b.append(title, count);
+                b.addEventListener('click', () => openSection(s, matches, q));
+                cats.appendChild(b);
+            });
+            
+            if (!found) {
+                const e = document.createElement('div');
+                e.className = 'empty';
+                e.textContent = 'ماكو نتائج مطابقة';
+                cats.appendChild(e);
+            }
+        }
+        
+        function openSection(s, filtered, q = '') {
+            document.getElementById('modalTitle').textContent = s.title;
+            const list = document.getElementById('medlist');
+            list.innerHTML = '';
+            
+            const meds = q ? filtered : s.medicines;
+            document.getElementById('modalMeta').textContent = meds.length + ' عنصر';
+            
+            if (!meds.length) {
+                const e = document.createElement('div');
+                e.className = 'empty';
+                e.textContent = 'ماكو أدوية مطابقة';
+                list.appendChild(e);
+            }
+            
+            meds.forEach(m => {
+                const row = document.createElement('div');
+                row.className = 'medicine';
+                
+                const name = document.createElement('div');
+                name.className = 'medname';
+                name.textContent = m.name;
+                
+                const badge = document.createElement('span');
+                badge.className = 'badge ' + m.state;
+                badge.textContent = m.label;
+                
+                row.append(name, badge);
+                list.appendChild(row);
+            });
+            
+            overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            overlay.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        document.getElementById('close').addEventListener('click', closeModal);
+        overlay.addEventListener('click', e => { if (e.target === overlay) closeModal() });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal() });
+        search.addEventListener('input', () => renderCategories(search.value));
+        
+        renderCategories();
+    </script>
 </body>
 </html>
-
